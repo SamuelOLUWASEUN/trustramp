@@ -1,0 +1,95 @@
+:root {
+  --void: #0a0e17;
+  --slate: #151b28;
+  --slate-2: #1d2536;
+  --fog: #e6eaf0;
+  --fog-dim: #9aa4b8;
+  --fog-faint: #5a6478;
+  --cleared: #34d399;
+  --held: #fbbf24;
+  --dispute: #f87171;
+  --accent: #5b8def;
+  --accent-dim: #3a5da8;
+  --hairline: #232c3f;
+  --hairline-strong: #33405a;
+
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  background: var(--void);
+  color: var(--fog);
+  font-family: var(--font-display);
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "ss01", "ss02";
+}
+
+body {
+  min-height: 100vh;
+  background-image: radial-gradient(
+    circle at 15% -10%,
+    rgba(91, 141, 239, 0.08),
+    transparent 45%
+  );
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+input,
+select {
+  font-family: inherit;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--void);
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-feature-settings: normal;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--fog-faint);
+}
+
+/* Focus visibility — part of the quality floor */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Collapse the two-column layouts on narrow screens */
+@media (max-width: 860px) {
+  .stack-mobile {
+    grid-template-columns: 1fr !important;
+  }
+}

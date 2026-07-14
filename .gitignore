@@ -1,0 +1,15 @@
+# contracts
+trustramp/node_modules/
+trustramp/artifacts/
+trustramp/cache/
+trustramp/.env
+
+# frontend
+trustramp-web/node_modules/
+trustramp-web/.next/
+trustramp-web/.env.local
+trustramp-web/.env
+
+# general
+.DS_Store
+*.log
