@@ -16,8 +16,8 @@ export default function Home() {
   return (
     <>
       <WalletBanner />
-      <main style={page.wrap}>
-        <header style={page.header}>
+      <header className="site-header">
+        <div style={page.headerInner}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <div style={page.mark} aria-hidden="true" />
             <span style={{ fontSize: 17, fontWeight: 600, letterSpacing: "-0.01em" }}>
@@ -25,7 +25,9 @@ export default function Home() {
             </span>
           </div>
           <ConnectButton />
-        </header>
+        </div>
+      </header>
+      <main style={page.wrap}>
 
       <section style={page.hero}>
         <div className="eyebrow" style={{ marginBottom: 18 }}>
@@ -91,18 +93,17 @@ const page = {
     margin: "0 auto",
     padding: "0 clamp(20px, 5vw, 48px) 80px",
   } as React.CSSProperties,
-  header: {
+  headerInner: {
+    maxWidth: 1080,
+    margin: "0 auto",
     display: "flex",
     justifyContent: "space-between",
-    alignItems: "flex-start",
+    alignItems: "center",
     flexWrap: "wrap",
     gap: 12,
-    padding: "calc(24px + env(safe-area-inset-top, 0px)) 0 22px",
-    borderBottom: "1px solid var(--hairline)",
-    position: "sticky",
-    top: 0,
-    background: "var(--void)",
-    zIndex: 10,
+    // Same horizontal clamp as page.wrap so the logo lines up exactly with the
+    // card edges below it, even though the frosted bar itself is full-bleed.
+    padding: "calc(18px + env(safe-area-inset-top, 0px)) clamp(20px, 5vw, 48px) 18px",
   } as React.CSSProperties,
   mark: {
     width: 22,

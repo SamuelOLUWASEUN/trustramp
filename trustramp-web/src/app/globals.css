@@ -16,6 +16,8 @@
   --input-bg: var(--void);
   --banner-bg: #2b2210;
   --banner-text: #f5c451;
+  --header-tint: rgba(10, 14, 23, 0.55);
+  --header-solid: #0a0e17;
 
   --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
@@ -38,6 +40,8 @@
   --input-bg: #f4f5f7;
   --banner-bg: #fdf0d5;
   --banner-text: #92600a;
+  --header-tint: rgba(244, 245, 247, 0.6);
+  --header-solid: #f4f5f7;
 }
 
 * {
@@ -238,4 +242,23 @@ select {
 .wallet-banner.visible {
   max-height: 44px;
   opacity: 1;
+}
+
+/* Sticky header: frosted rather than a solid slab, so the page's background
+   gradient still reads through it while scrolled content stays legible behind. */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  /* Fallback for browsers without backdrop-filter: go opaque, since a
+     see-through sticky bar would let content scroll under and collide. */
+  background: var(--header-solid);
+}
+
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .site-header {
+    background: var(--header-tint);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    backdrop-filter: blur(14px) saturate(140%);
+  }
 }

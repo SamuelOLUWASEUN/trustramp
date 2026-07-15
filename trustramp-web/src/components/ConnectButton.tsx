@@ -5,6 +5,7 @@ import { monadTestnet } from "@/lib/chains";
 import { shortenAddress } from "@/lib/format";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Spinner } from "@/components/Spinner";
+import { WalletIcon } from "@/components/WalletIcon";
 import { useWalletConnect } from "@/lib/useWalletConnect";
 
 export function ConnectButton() {
@@ -31,22 +32,22 @@ export function ConnectButton() {
 
   if (!isConnected) {
     if (hasInjectedProvider === null) {
-      return <Shell action={<div style={{ width: 130, height: 38 }} aria-hidden="true" />} />;
+      return <Shell action={<div style={{ width: 38, height: 38 }} aria-hidden="true" />} />;
     }
 
+    // Icon-only on purpose: the amber banner and the in-card blocker button both
+    // carry the written call to action, so the header stays weightless.
     return (
       <Shell
         action={
-          <button onClick={connectOrOpenMetaMask} disabled={isPending} style={btn.primary}>
-            {isPending ? (
-              <>
-                <Spinner /> Opening wallet…
-              </>
-            ) : hasInjectedProvider ? (
-              "Connect wallet"
-            ) : (
-              "Open in MetaMask"
-            )}
+          <button
+            onClick={connectOrOpenMetaMask}
+            disabled={isPending}
+            style={btn.icon}
+            aria-label={hasInjectedProvider ? "Connect wallet" : "Open in MetaMask"}
+            title={hasInjectedProvider ? "Connect wallet" : "Open in MetaMask"}
+          >
+            {isPending ? <Spinner /> : <WalletIcon />}
           </button>
         }
         status={
@@ -124,11 +125,22 @@ const base: React.CSSProperties = {
 };
 
 const btn = {
-  primary: {
-    ...base,
-    background: "var(--accent)",
-    color: "var(--void)",
+  // Borderless, background-free icon button — same weightless footprint as the
+  // theme toggle so the two sit on one clean line.
+  icon: {
+    width: 38,
+    height: 38,
+    padding: 0,
+    background: "transparent",
+    border: "none",
+    borderRadius: 8,
+    color: "var(--fog-dim)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
   } as React.CSSProperties,
+  // Kept bordered on purpose: this is an alert state, not a utility. It needs to
+  // read as something you must act on, not blend into the chrome.
   warn: {
     ...base,
     background: "transparent",
@@ -137,8 +149,10 @@ const btn = {
   } as React.CSSProperties,
   ghost: {
     ...base,
+    padding: "0 4px",
     background: "transparent",
-    borderColor: "var(--hairline-strong)",
-    color: "var(--fog-dim)",
+    border: "none",
+    color: "var(--fog-faint)",
+    fontSize: 13,
   } as React.CSSProperties,
 };
