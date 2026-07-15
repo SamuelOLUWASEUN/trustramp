@@ -85,7 +85,7 @@ const page = {
   wrap: {
     maxWidth: 1080,
     margin: "0 auto",
-    padding: "0 24px 80px",
+    padding: "0 clamp(20px, 5vw, 48px) 80px",
   } as React.CSSProperties,
   header: {
     display: "flex",
@@ -93,7 +93,7 @@ const page = {
     alignItems: "flex-start",
     flexWrap: "wrap",
     gap: 12,
-    padding: "calc(18px + env(safe-area-inset-top, 0px)) 0 18px",
+    padding: "calc(24px + env(safe-area-inset-top, 0px)) 0 22px",
     borderBottom: "1px solid var(--hairline)",
     position: "sticky",
     top: 0,
