@@ -8,6 +8,7 @@ import { isAddressLike, sanitizeDecimalInput } from "@/lib/format";
 import { monadTestnet } from "@/lib/chains";
 import { PasteButton } from "@/components/PasteButton";
 import { Spinner } from "@/components/Spinner";
+import { useWalletConnect } from "@/lib/useWalletConnect";
 
 const WINDOW_OPTIONS = [
   { label: "1 hour", seconds: 3600 },
@@ -22,6 +23,7 @@ export function CreateTrade({ onCreated }: { onCreated?: () => void }) {
   const chainId = useChainId();
   const { switchChainAsync } = useSwitchChain();
   const onWrongNetwork = isConnected && chainId !== monadTestnet.id;
+  const { isPending: connectPending, connectOrOpenMetaMask } = useWalletConnect();
 
   const [receiver, setReceiver] = useState("");
   const [token, setToken] = useState("");
@@ -158,7 +160,17 @@ export function CreateTrade({ onCreated }: { onCreated?: () => void }) {
 
       {error && <div style={form.error}>{error}</div>}
 
-      {onWrongNetwork ? (
+      {!isConnected ? (
+        <button onClick={connectOrOpenMetaMask} disabled={connectPending} style={form.connectBlocker}>
+          {connectPending ? (
+            <>
+              <Spinner /> Opening wallet…
+            </>
+          ) : (
+            "🔌 Connect wallet to lock funds"
+          )}
+        </button>
+      ) : onWrongNetwork ? (
         <button
           onClick={() => switchChainAsync({ chainId: monadTestnet.id }).catch(() => {})}
           style={form.switchNetwork}
@@ -284,5 +296,19 @@ const form = {
     borderRadius: 10,
     fontSize: 14.5,
     fontWeight: 500,
+  } as React.CSSProperties,
+  connectBlocker: {
+    width: "100%",
+    height: 44,
+    background: "var(--slate-2)",
+    color: "var(--fog-dim)",
+    border: "1px solid var(--hairline-strong)",
+    borderRadius: 10,
+    fontSize: 14.5,
+    fontWeight: 500,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
   } as React.CSSProperties,
 };

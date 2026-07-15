@@ -38,13 +38,13 @@ export function ThemeToggle() {
         width: 38,
         height: 38,
         borderRadius: 8,
-        border: "1px solid var(--hairline-strong)",
+        border: "none",
         background: "transparent",
         color: "var(--fog-dim)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        fontSize: 16,
+        fontSize: 19,
       }}
     >
       {theme === "light" ? "🌙" : "☀️"}

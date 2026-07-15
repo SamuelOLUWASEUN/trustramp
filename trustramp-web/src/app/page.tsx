@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { escrowConfigured } from "@/lib/contract";
 import { ConnectButton } from "@/components/ConnectButton";
+import { WalletBanner } from "@/components/WalletBanner";
 import { RateCheck } from "@/components/RateCheck";
 import { CreateTrade } from "@/components/CreateTrade";
 import { TradeList } from "@/components/TradeList";
@@ -13,16 +14,18 @@ export default function Home() {
   const bump = () => setRefreshKey((k) => k + 1);
 
   return (
-    <main style={page.wrap}>
-      <header style={page.header}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={page.mark} aria-hidden="true" />
-          <span style={{ fontSize: 17, fontWeight: 600, letterSpacing: "-0.01em" }}>
-            Trustramp
-          </span>
-        </div>
-        <ConnectButton />
-      </header>
+    <>
+      <WalletBanner />
+      <main style={page.wrap}>
+        <header style={page.header}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={page.mark} aria-hidden="true" />
+            <span style={{ fontSize: 17, fontWeight: 600, letterSpacing: "-0.01em" }}>
+              Trustramp
+            </span>
+          </div>
+          <ConnectButton />
+        </header>
 
       <section style={page.hero}>
         <div className="eyebrow" style={{ marginBottom: 18 }}>
@@ -64,7 +67,8 @@ export default function Home() {
           Escrow settles on Monad · funds are never custodied by Trustramp
         </span>
       </footer>
-    </main>
+      </main>
+    </>
   );
 }
 

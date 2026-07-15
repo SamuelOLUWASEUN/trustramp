@@ -14,6 +14,8 @@
   --hairline: #232c3f;
   --hairline-strong: #33405a;
   --input-bg: var(--void);
+  --banner-bg: #2b2210;
+  --banner-text: #f5c451;
 
   --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
@@ -34,6 +36,8 @@
   --hairline: #dde1e8;
   --hairline-strong: #c3c9d4;
   --input-bg: #f4f5f7;
+  --banner-bg: #fdf0d5;
+  --banner-text: #92600a;
 }
 
 * {
@@ -220,4 +224,18 @@ select {
   .reputation-actions > .check-btn {
     width: 100%;
   }
+}
+
+/* Ambient wallet-status banner — collapses smoothly rather than popping in/out */
+.wallet-banner {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 220ms ease, opacity 180ms ease;
+  background: var(--banner-bg);
+  color: var(--banner-text);
+}
+.wallet-banner.visible {
+  max-height: 44px;
+  opacity: 1;
 }

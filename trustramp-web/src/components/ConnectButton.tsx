@@ -1,45 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useAccount, useConnect, useDisconnect, useChainId, useSwitchChain } from "wagmi";
+import { useAccount, useDisconnect, useChainId, useSwitchChain } from "wagmi";
 import { monadTestnet } from "@/lib/chains";
 import { shortenAddress } from "@/lib/format";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Spinner } from "@/components/Spinner";
+import { useWalletConnect } from "@/lib/useWalletConnect";
 
 export function ConnectButton() {
   const { address, isConnected } = useAccount();
-  const { connect, connectors, isPending } = useConnect();
   const { disconnect } = useDisconnect();
   const chainId = useChainId();
   const { switchChain } = useSwitchChain();
+  const { hasInjectedProvider, isPending, connectError, connectOrOpenMetaMask } =
+    useWalletConnect();
 
-  const [hasInjectedProvider, setHasInjectedProvider] = useState<boolean | null>(null);
-  const [connectError, setConnectError] = useState<string | null>(null);
-
-  useEffect(() => {
-    setHasInjectedProvider(
-      typeof window !== "undefined" && typeof (window as any).ethereum !== "undefined"
-    );
-  }, []);
-
-  const injected = connectors.find((c) => c.id === "injected") ?? connectors[0];
   const onWrongNetwork = isConnected && chainId !== monadTestnet.id;
-
-  async function handleConnect() {
-    setConnectError(null);
-    if (!injected) return;
-    try {
-      await connect({ connector: injected });
-    } catch (err) {
-      setConnectError(err instanceof Error ? err.message : "Couldn't connect. Try again.");
-    }
-  }
-
-  function openInMetaMask() {
-    const target = `${window.location.host}${window.location.pathname}`;
-    window.location.href = `https://metamask.app.link/dapp/${target}`;
-  }
 
   function Shell({ action, status }: { action: React.ReactNode; status?: React.ReactNode }) {
     return (
@@ -58,33 +34,18 @@ export function ConnectButton() {
       return <Shell action={<div style={{ width: 130, height: 38 }} aria-hidden="true" />} />;
     }
 
-    if (!hasInjectedProvider) {
-      return (
-        <Shell
-          action={
-            <button onClick={openInMetaMask} style={btn.primary}>
-              Open in MetaMask
-            </button>
-          }
-          status={
-            <span style={{ fontSize: 10.5, color: "var(--fog-faint)" }}>
-              No wallet detected in this browser
-            </span>
-          }
-        />
-      );
-    }
-
     return (
       <Shell
         action={
-          <button onClick={handleConnect} disabled={isPending} style={btn.primary}>
+          <button onClick={connectOrOpenMetaMask} disabled={isPending} style={btn.primary}>
             {isPending ? (
               <>
                 <Spinner /> Opening wallet…
               </>
-            ) : (
+            ) : hasInjectedProvider ? (
               "Connect wallet"
+            ) : (
+              "Open in MetaMask"
             )}
           </button>
         }
