@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { formatUnits } from "viem";
 import { useAccount, useWriteContract } from "wagmi";
+import { waitForTransactionReceipt } from "wagmi/actions";
 import {
   ESCROW_ADDRESS,
   escrowAbi,
@@ -11,6 +13,7 @@ import {
 } from "@/lib/contract";
 import { shortenAddress, formatDeadline, tradeSerial } from "@/lib/format";
 import { monadTestnet } from "@/lib/chains";
+import { config } from "@/lib/wagmi";
 
 const TONE_COLOR: Record<string, string> = {
   held: "var(--held)",
@@ -30,6 +33,7 @@ export function TradeTicket({
 }) {
   const { address } = useAccount();
   const { writeContractAsync, isPending } = useWriteContract();
+  const [confirming, setConfirming] = useState(false);
 
   const status = trade.status as TradeStatus;
   const meta = STATUS_META[status] ?? STATUS_META[TradeStatus.None];
@@ -41,18 +45,24 @@ export function TradeTicket({
 
   async function call(fn: "confirmPayment" | "releaseFunds" | "refund" | "raiseDispute") {
     try {
-      await writeContractAsync({
+      const hash = await writeContractAsync({
         address: ESCROW_ADDRESS,
         abi: escrowAbi,
         functionName: fn,
         args: [id],
         chainId: monadTestnet.id,
       });
+      // writeContractAsync resolves once the tx is *submitted*, not once it's mined.
+      // Refreshing immediately after that can still show stale status if the block
+      // hasn't landed yet — so wait for the actual receipt first.
+      setConfirming(true);
+      await waitForTransactionReceipt(config, { hash, chainId: monadTestnet.id });
       onAction?.();
     } catch (err) {
-      // Surface the revert reason to the user rather than swallowing it.
       console.error(err);
       alert(err instanceof Error ? err.message : "Transaction failed");
+    } finally {
+      setConfirming(false);
     }
   }
 
@@ -128,15 +138,15 @@ export function TradeTicket({
               <button
                 key={a.fn}
                 onClick={() => call(a.fn)}
-                disabled={isPending}
+                disabled={isPending || confirming}
                 style={{
                   ...ticket.actionBtn,
                   borderColor: a.tone,
                   color: a.tone,
-                  opacity: isPending ? 0.5 : 1,
+                  opacity: isPending || confirming ? 0.5 : 1,
                 }}
               >
-                {a.label}
+                {confirming ? "Confirming on-chain…" : a.label}
               </button>
             ))}
           </div>

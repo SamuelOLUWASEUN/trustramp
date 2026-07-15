@@ -22,7 +22,7 @@ export function TradeList({ refreshKey }: { refreshKey: number }) {
     return Array.from({ length: total }, (_, i) => BigInt(i + 1));
   }, [nextId]);
 
-  const { data: tradesData } = useReadContracts({
+  const { data: tradesData, refetch } = useReadContracts({
     contracts: ids.map((id) => ({
       address: ESCROW_ADDRESS,
       abi: escrowAbi,
@@ -58,7 +58,7 @@ export function TradeList({ refreshKey }: { refreshKey: number }) {
   return (
     <div style={{ display: "grid", gap: 14 }}>
       {mine.map(({ id, trade }) => (
-        <TradeTicket key={id.toString()} id={id} trade={trade} />
+        <TradeTicket key={id.toString()} id={id} trade={trade} onAction={() => refetch()} />
       ))}
     </div>
   );
