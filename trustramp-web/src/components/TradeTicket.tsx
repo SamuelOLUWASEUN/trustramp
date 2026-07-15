@@ -10,6 +10,7 @@ import {
   type TradeTuple,
 } from "@/lib/contract";
 import { shortenAddress, formatDeadline, tradeSerial } from "@/lib/format";
+import { monadTestnet } from "@/lib/chains";
 
 const TONE_COLOR: Record<string, string> = {
   held: "var(--held)",
@@ -45,6 +46,7 @@ export function TradeTicket({
         abi: escrowAbi,
         functionName: fn,
         args: [id],
+        chainId: monadTestnet.id,
       });
       onAction?.();
     } catch (err) {

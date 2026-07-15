@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { parseUnits, type Address } from "viem";
-import { useAccount, useWriteContract } from "wagmi";
+import { useAccount, useWriteContract, useChainId, useSwitchChain } from "wagmi";
 import { ESCROW_ADDRESS, escrowAbi, erc20Abi } from "@/lib/contract";
 import { isAddressLike } from "@/lib/format";
+import { monadTestnet } from "@/lib/chains";
 
 const WINDOW_OPTIONS = [
   { label: "1 hour", seconds: 3600 },
@@ -16,6 +17,9 @@ const WINDOW_OPTIONS = [
 export function CreateTrade({ onCreated }: { onCreated?: () => void }) {
   const { isConnected } = useAccount();
   const { writeContractAsync } = useWriteContract();
+  const chainId = useChainId();
+  const { switchChainAsync } = useSwitchChain();
+  const onWrongNetwork = isConnected && chainId !== monadTestnet.id;
 
   const [receiver, setReceiver] = useState("");
   const [token, setToken] = useState("");
@@ -28,7 +32,8 @@ export function CreateTrade({ onCreated }: { onCreated?: () => void }) {
   const validToken = isAddressLike(token);
   const amountNum = parseFloat(amount);
   const validAmount = !Number.isNaN(amountNum) && amountNum > 0;
-  const canSubmit = isConnected && validReceiver && validToken && validAmount && step === "idle";
+  const canSubmit =
+    isConnected && !onWrongNetwork && validReceiver && validToken && validAmount && step === "idle";
 
   async function submit() {
     setError(null);
@@ -36,11 +41,16 @@ export function CreateTrade({ onCreated }: { onCreated?: () => void }) {
       const parsed = parseUnits(amount, 6); // USDC-style 6 decimals
 
       setStep("approving");
+      // chainId is passed explicitly on every write so the wallet is asked to sign on
+      // Monad testnet specifically — without this, a wallet sitting on a different
+      // chain (e.g. Ethereum mainnet by default) will try to sign there instead,
+      // which is what caused a real-ETH gas prompt during testing.
       await writeContractAsync({
         address: token as Address,
         abi: erc20Abi,
         functionName: "approve",
         args: [ESCROW_ADDRESS, parsed],
+        chainId: monadTestnet.id,
       });
 
       setStep("creating");
@@ -49,6 +59,7 @@ export function CreateTrade({ onCreated }: { onCreated?: () => void }) {
         abi: escrowAbi,
         functionName: "createTrade",
         args: [receiver as Address, token as Address, parsed, BigInt(windowSec)],
+        chainId: monadTestnet.id,
       });
 
       setReceiver("");
@@ -139,13 +150,22 @@ export function CreateTrade({ onCreated }: { onCreated?: () => void }) {
 
       {error && <div style={form.error}>{error}</div>}
 
-      <button onClick={submit} disabled={!canSubmit} style={{ ...form.submit, opacity: canSubmit ? 1 : 0.45 }}>
-        {step === "approving"
-          ? "Approving token…"
-          : step === "creating"
-            ? "Locking funds…"
-            : "Lock funds in escrow"}
-      </button>
+      {onWrongNetwork ? (
+        <button
+          onClick={() => switchChainAsync({ chainId: monadTestnet.id }).catch(() => {})}
+          style={form.switchNetwork}
+        >
+          Switch to Monad testnet to continue
+        </button>
+      ) : (
+        <button onClick={submit} disabled={!canSubmit} style={{ ...form.submit, opacity: canSubmit ? 1 : 0.45 }}>
+          {step === "approving"
+            ? "Approving token…"
+            : step === "creating"
+              ? "Locking funds…"
+              : "Lock funds in escrow"}
+        </button>
+      )}
     </section>
   );
 }
@@ -232,6 +252,16 @@ const form = {
     background: "var(--accent)",
     color: "var(--void)",
     border: "none",
+    borderRadius: 10,
+    fontSize: 14.5,
+    fontWeight: 500,
+  } as React.CSSProperties,
+  switchNetwork: {
+    width: "100%",
+    height: 44,
+    background: "transparent",
+    color: "var(--held)",
+    border: "1px solid var(--held)",
     borderRadius: 10,
     fontSize: 14.5,
     fontWeight: 500,
