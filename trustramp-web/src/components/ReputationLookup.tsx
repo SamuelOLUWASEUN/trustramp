@@ -93,7 +93,7 @@ const card = {
   input: {
     flex: 1,
     height: 40,
-    background: "var(--void)",
+    background: "var(--input-bg)",
     border: "1px solid var(--hairline-strong)",
     borderRadius: 8,
     color: "var(--fog)",

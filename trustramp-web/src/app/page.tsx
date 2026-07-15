@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { escrowConfigured } from "@/lib/contract";
 import { ConnectButton } from "@/components/ConnectButton";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { RateCheck } from "@/components/RateCheck";
 import { CreateTrade } from "@/components/CreateTrade";
 import { TradeList } from "@/components/TradeList";
@@ -21,7 +22,10 @@ export default function Home() {
             Trustramp
           </span>
         </div>
-        <ConnectButton />
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <ThemeToggle />
+          <ConnectButton />
+        </div>
       </header>
 
       <section style={page.hero}>

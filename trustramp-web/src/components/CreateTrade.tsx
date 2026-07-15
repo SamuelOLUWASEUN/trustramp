@@ -68,22 +68,36 @@ export function CreateTrade({ onCreated }: { onCreated?: () => void }) {
         New trade · lock funds
       </div>
 
-      <Field label="Receiver wallet" hint={receiver && !validReceiver ? "Not a valid address" : undefined}>
+      <Field
+        label="Receiver wallet"
+        hint={receiver && !validReceiver ? "Not a valid address" : undefined}
+        isError={!!receiver && !validReceiver}
+      >
         <input
           value={receiver}
           onChange={(e) => setReceiver(e.target.value.trim())}
           placeholder="0x… the person sending you naira"
-          style={form.input}
+          style={{
+            ...form.input,
+            ...(receiver && !validReceiver ? form.inputError : {}),
+          }}
           className="mono"
         />
       </Field>
 
-      <Field label="Stablecoin address" hint={token && !validToken ? "Not a valid address" : "USDC / USDT0 on Monad"}>
+      <Field
+        label="Stablecoin address"
+        hint={token && !validToken ? "Not a valid address" : "USDC / USDT0 on Monad"}
+        isError={!!token && !validToken}
+      >
         <input
           value={token}
           onChange={(e) => setToken(e.target.value.trim())}
           placeholder="0x… token contract"
-          style={form.input}
+          style={{
+            ...form.input,
+            ...(token && !validToken ? form.inputError : {}),
+          }}
           className="mono"
         />
       </Field>
@@ -139,17 +153,33 @@ export function CreateTrade({ onCreated }: { onCreated?: () => void }) {
 function Field({
   label,
   hint,
+  isError,
   children,
 }: {
   label: string;
   hint?: string;
+  isError?: boolean;
   children: React.ReactNode;
 }) {
   return (
     <div style={{ marginBottom: 16 }}>
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 7 }}>
         <label style={{ fontSize: 12, color: "var(--fog-dim)" }}>{label}</label>
-        {hint && <span style={{ fontSize: 11, color: "var(--fog-faint)" }}>{hint}</span>}
+        {hint && (
+          <span
+            style={{
+              fontSize: isError ? 12 : 11,
+              fontWeight: isError ? 600 : 400,
+              color: isError ? "var(--dispute)" : "var(--fog-faint)",
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
+            }}
+          >
+            {isError && <span aria-hidden="true">⚠</span>}
+            {hint}
+          </span>
+        )}
       </div>
       {children}
     </div>
@@ -166,12 +196,16 @@ const form = {
   input: {
     width: "100%",
     height: 40,
-    background: "var(--void)",
+    background: "var(--input-bg)",
     border: "1px solid var(--hairline-strong)",
     borderRadius: 8,
     color: "var(--fog)",
     padding: "0 12px",
     fontSize: 14,
+  } as React.CSSProperties,
+  inputError: {
+    borderColor: "var(--dispute)",
+    boxShadow: "0 0 0 1px var(--dispute)",
   } as React.CSSProperties,
   row: {
     display: "grid",

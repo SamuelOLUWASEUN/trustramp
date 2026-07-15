@@ -1,4 +1,5 @@
-:root {
+:root,
+[data-theme="dark"] {
   --void: #0a0e17;
   --slate: #151b28;
   --slate-2: #1d2536;
@@ -12,9 +13,27 @@
   --accent-dim: #3a5da8;
   --hairline: #232c3f;
   --hairline-strong: #33405a;
+  --input-bg: var(--void);
 
   --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+}
+
+[data-theme="light"] {
+  --void: #f4f5f7;
+  --slate: #ffffff;
+  --slate-2: #eceef2;
+  --fog: #161a24;
+  --fog-dim: #4b5568;
+  --fog-faint: #7c869a;
+  --cleared: #0f9d68;
+  --held: #b5760a;
+  --dispute: #d13c3c;
+  --accent: #3d63c9;
+  --accent-dim: #274585;
+  --hairline: #dde1e8;
+  --hairline-strong: #c3c9d4;
+  --input-bg: #f4f5f7;
 }
 
 * {
@@ -49,6 +68,27 @@ a {
 button {
   font-family: inherit;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 100ms, transform 100ms, background-color 150ms, border-color 150ms;
+}
+
+button:active:not(:disabled) {
+  opacity: 0.72;
+  transform: scale(0.98);
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+html {
+  transition: background-color 150ms;
+}
+
+body,
+input,
+select {
+  transition: background-color 150ms, color 150ms, border-color 150ms;
 }
 
 input,

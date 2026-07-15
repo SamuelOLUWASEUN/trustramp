@@ -28,6 +28,15 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${spaceGrotesk.variable} ${jetbrainsMono.variable}`}>
+      <head>
+        <script
+          // Runs before paint so we never flash the wrong theme. Reads the saved
+          // preference; falls back to dark, which is the intended default.
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('trustramp-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();`,
+          }}
+        />
+      </head>
       <body>
         <Providers>{children}</Providers>
       </body>

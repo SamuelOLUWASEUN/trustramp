@@ -126,7 +126,7 @@ const card = {
   input: {
     width: "100%",
     height: 34,
-    background: "var(--void)",
+    background: "var(--input-bg)",
     border: "1px solid var(--hairline-strong)",
     borderRadius: 8,
     color: "var(--fog)",
