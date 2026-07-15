@@ -34,18 +34,21 @@ export function ReputationLookup() {
         Before you trade with someone, look up their onchain history.
       </p>
 
-      <div style={{ display: "flex", gap: 8, marginBottom: 18 }}>
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value.trim())}
-          placeholder="0x… wallet address"
-          style={card.input}
-          className="mono"
-        />
-        <PasteButton onPaste={setInput} />
+      <div className="reputation-actions" style={{ marginBottom: 18 }}>
+        <div className="addr-field">
+          <input
+            value={input}
+            onChange={(e) => setInput(e.target.value.trim())}
+            placeholder="0x… wallet address"
+            style={card.input}
+            className="mono"
+          />
+          <PasteButton onPaste={setInput} />
+        </div>
         <button
           onClick={() => isAddressLike(input) && setTarget(input)}
           disabled={!isAddressLike(input)}
+          className="check-btn"
           style={{ ...card.btn, opacity: isAddressLike(input) ? 1 : 0.45 }}
         >
           Check
@@ -97,7 +100,7 @@ const card = {
     padding: "20px 22px",
   } as React.CSSProperties,
   input: {
-    flex: 1,
+    width: "100%",
     height: 40,
     background: "var(--input-bg)",
     border: "1px solid var(--hairline-strong)",

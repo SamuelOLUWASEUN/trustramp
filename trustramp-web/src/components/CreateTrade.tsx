@@ -86,7 +86,7 @@ export function CreateTrade({ onCreated }: { onCreated?: () => void }) {
         hint={receiver && !validReceiver ? "Not a valid address" : undefined}
         isError={!!receiver && !validReceiver}
       >
-        <div style={{ display: "flex", gap: 8 }}>
+        <div className="addr-field">
           <input
             value={receiver}
             onChange={(e) => setReceiver(e.target.value.trim())}
@@ -106,7 +106,7 @@ export function CreateTrade({ onCreated }: { onCreated?: () => void }) {
         hint={token && !validToken ? "Not a valid address" : "USDC / USDT0 on Monad"}
         isError={!!token && !validToken}
       >
-        <div style={{ display: "flex", gap: 8 }}>
+        <div className="addr-field">
           <input
             value={token}
             onChange={(e) => setToken(e.target.value.trim())}

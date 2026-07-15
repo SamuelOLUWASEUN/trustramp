@@ -14,16 +14,16 @@ export function PasteButton({ onPaste }: { onPaste: (text: string) => void }) {
     <button
       type="button"
       onClick={handlePaste}
+      className="addr-paste"
       style={{
-        height: 40,
-        padding: "0 12px",
-        background: "transparent",
+        height: 30,
+        padding: "0 10px",
+        background: "var(--slate-2)",
         border: "1px solid var(--hairline-strong)",
-        borderRadius: 8,
+        borderRadius: 6,
         color: "var(--fog-dim)",
-        fontSize: 12.5,
+        fontSize: 11.5,
         fontWeight: 500,
-        flexShrink: 0,
       }}
     >
       Paste

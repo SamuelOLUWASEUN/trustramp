@@ -50,7 +50,7 @@ export function RateCheck() {
         Rate check · USD → NGN
       </div>
 
-      <div style={card.grid}>
+      <div className="rate-fields">
         <div>
           <div style={card.smallLabel}>Mid-market rate</div>
           {mid.status === "loading" ? (
@@ -114,11 +114,6 @@ const card = {
     border: "1px solid var(--hairline)",
     borderRadius: 14,
     padding: "20px 22px",
-  } as React.CSSProperties,
-  grid: {
-    display: "grid",
-    gridTemplateColumns: "1fr 1fr",
-    gap: 20,
   } as React.CSSProperties,
   smallLabel: {
     fontSize: 12,

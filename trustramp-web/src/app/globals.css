@@ -170,3 +170,54 @@ select {
     filter: brightness(1.08);
   }
 }
+
+/* Rate check's two fields: side by side on wider screens, stacked on narrow ones */
+.rate-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+@media (max-width: 480px) {
+  .rate-fields {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+/* Address input with Paste nested inside its right edge, instead of sitting
+   beside it as a separate flex item — removes a whole element from the row. */
+.addr-field {
+  position: relative;
+}
+.addr-field input {
+  padding-right: 68px !important;
+}
+.addr-field .addr-paste {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Reputation check's input+Check: row on wider screens, Check drops full-width
+   below on narrow ones so it's never squeezed off-screen. */
+.reputation-actions {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+.reputation-actions > .addr-field {
+  flex: 1;
+  min-width: 0;
+}
+.reputation-actions > .check-btn {
+  flex-shrink: 0;
+}
+@media (max-width: 480px) {
+  .reputation-actions {
+    flex-direction: column;
+  }
+  .reputation-actions > .check-btn {
+    width: 100%;
+  }
+}
