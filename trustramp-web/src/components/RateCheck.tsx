@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { sanitizeDecimalInput } from "@/lib/format";
 
 type RateState =
   | { status: "loading" }
@@ -52,13 +53,15 @@ export function RateCheck() {
       <div style={card.grid}>
         <div>
           <div style={card.smallLabel}>Mid-market rate</div>
-          <div className="mono" style={card.bigNum}>
-            {mid.status === "ready"
-              ? `₦${mid.rate.toLocaleString(undefined, { maximumFractionDigits: 2 })}`
-              : mid.status === "loading"
-                ? "…"
+          {mid.status === "loading" ? (
+            <div className="skeleton" style={{ width: 110, height: 26, marginTop: 2 }} />
+          ) : (
+            <div className="mono" style={card.bigNum}>
+              {mid.status === "ready"
+                ? `₦${mid.rate.toLocaleString(undefined, { maximumFractionDigits: 2 })}`
                 : "unavailable"}
-          </div>
+            </div>
+          )}
         </div>
 
         <div>
@@ -70,7 +73,7 @@ export function RateCheck() {
             <input
               inputMode="decimal"
               value={offered}
-              onChange={(e) => setOffered(e.target.value.replace(/[^0-9.]/g, ""))}
+              onChange={(e) => setOffered(sanitizeDecimalInput(e.target.value))}
               placeholder="1450"
               style={card.input}
               className="mono"

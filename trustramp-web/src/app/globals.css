@@ -133,3 +133,38 @@ select {
     grid-template-columns: 1fr !important;
   }
 }
+
+/* Skeleton loading placeholders */
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 0.9; }
+}
+
+.skeleton {
+  background: var(--slate-2);
+  border-radius: 6px;
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
+}
+
+/* Spinner for in-flight actions */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.spinner {
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  flex-shrink: 0;
+}
+
+/* Desktop hover feedback — active state alone doesn't fire with a mouse */
+@media (hover: hover) {
+  button:hover:not(:disabled) {
+    filter: brightness(1.08);
+  }
+}

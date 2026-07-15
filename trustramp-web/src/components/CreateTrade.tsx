@@ -4,8 +4,10 @@ import { useState } from "react";
 import { parseUnits, type Address } from "viem";
 import { useAccount, useWriteContract, useChainId, useSwitchChain } from "wagmi";
 import { ESCROW_ADDRESS, escrowAbi, erc20Abi } from "@/lib/contract";
-import { isAddressLike } from "@/lib/format";
+import { isAddressLike, sanitizeDecimalInput } from "@/lib/format";
 import { monadTestnet } from "@/lib/chains";
+import { PasteButton } from "@/components/PasteButton";
+import { Spinner } from "@/components/Spinner";
 
 const WINDOW_OPTIONS = [
   { label: "1 hour", seconds: 3600 },
@@ -84,16 +86,19 @@ export function CreateTrade({ onCreated }: { onCreated?: () => void }) {
         hint={receiver && !validReceiver ? "Not a valid address" : undefined}
         isError={!!receiver && !validReceiver}
       >
-        <input
-          value={receiver}
-          onChange={(e) => setReceiver(e.target.value.trim())}
-          placeholder="0x… the person sending you naira"
-          style={{
-            ...form.input,
-            ...(receiver && !validReceiver ? form.inputError : {}),
-          }}
-          className="mono"
-        />
+        <div style={{ display: "flex", gap: 8 }}>
+          <input
+            value={receiver}
+            onChange={(e) => setReceiver(e.target.value.trim())}
+            placeholder="0x… the person sending you naira"
+            style={{
+              ...form.input,
+              ...(receiver && !validReceiver ? form.inputError : {}),
+            }}
+            className="mono"
+          />
+          <PasteButton onPaste={setReceiver} />
+        </div>
       </Field>
 
       <Field
@@ -101,16 +106,19 @@ export function CreateTrade({ onCreated }: { onCreated?: () => void }) {
         hint={token && !validToken ? "Not a valid address" : "USDC / USDT0 on Monad"}
         isError={!!token && !validToken}
       >
-        <input
-          value={token}
-          onChange={(e) => setToken(e.target.value.trim())}
-          placeholder="0x… token contract"
-          style={{
-            ...form.input,
-            ...(token && !validToken ? form.inputError : {}),
-          }}
-          className="mono"
-        />
+        <div style={{ display: "flex", gap: 8 }}>
+          <input
+            value={token}
+            onChange={(e) => setToken(e.target.value.trim())}
+            placeholder="0x… token contract"
+            style={{
+              ...form.input,
+              ...(token && !validToken ? form.inputError : {}),
+            }}
+            className="mono"
+          />
+          <PasteButton onPaste={setToken} />
+        </div>
       </Field>
 
       <div style={form.row}>
@@ -119,7 +127,7 @@ export function CreateTrade({ onCreated }: { onCreated?: () => void }) {
             <input
               inputMode="decimal"
               value={amount}
-              onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, ""))}
+              onChange={(e) => setAmount(sanitizeDecimalInput(e.target.value))}
               placeholder="100"
               style={form.input}
               className="mono"
@@ -159,11 +167,17 @@ export function CreateTrade({ onCreated }: { onCreated?: () => void }) {
         </button>
       ) : (
         <button onClick={submit} disabled={!canSubmit} style={{ ...form.submit, opacity: canSubmit ? 1 : 0.45 }}>
-          {step === "approving"
-            ? "Approving token…"
-            : step === "creating"
-              ? "Locking funds…"
-              : "Lock funds in escrow"}
+          {step === "approving" ? (
+            <>
+              <Spinner /> Approving token…
+            </>
+          ) : step === "creating" ? (
+            <>
+              <Spinner /> Locking funds…
+            </>
+          ) : (
+            "Lock funds in escrow"
+          )}
         </button>
       )}
     </section>
@@ -255,6 +269,10 @@ const form = {
     borderRadius: 10,
     fontSize: 14.5,
     fontWeight: 500,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
   } as React.CSSProperties,
   switchNetwork: {
     width: "100%",

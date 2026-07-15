@@ -5,6 +5,7 @@ import { type Address } from "viem";
 import { useReadContract } from "wagmi";
 import { ESCROW_ADDRESS, escrowAbi, type ReputationTuple } from "@/lib/contract";
 import { isAddressLike } from "@/lib/format";
+import { PasteButton } from "@/components/PasteButton";
 
 export function ReputationLookup() {
   const [input, setInput] = useState("");
@@ -41,6 +42,7 @@ export function ReputationLookup() {
           style={card.input}
           className="mono"
         />
+        <PasteButton onPaste={setInput} />
         <button
           onClick={() => isAddressLike(input) && setTarget(input)}
           disabled={!isAddressLike(input)}
@@ -53,7 +55,11 @@ export function ReputationLookup() {
       {target && (
         <div style={card.result}>
           {isFetching ? (
-            <span style={{ color: "var(--fog-faint)", fontSize: 13 }}>Reading chain…</span>
+            <div style={card.stats}>
+              <div className="skeleton" style={{ width: "100%", height: 44 }} />
+              <div className="skeleton" style={{ width: "100%", height: 44 }} />
+              <div className="skeleton" style={{ width: "100%", height: 44 }} />
+            </div>
           ) : total === 0 ? (
             <span style={{ color: "var(--held)", fontSize: 13, lineHeight: 1.5 }}>
               No trade history. Could be new, could be a fresh wallet — treat with caution and

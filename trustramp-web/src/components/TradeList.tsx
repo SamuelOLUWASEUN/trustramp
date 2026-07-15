@@ -8,7 +8,7 @@ import { TradeTicket } from "./TradeTicket";
 export function TradeList({ refreshKey }: { refreshKey: number }) {
   const { address } = useAccount();
 
-  const { data: nextId } = useReadContract({
+  const { data: nextId, isLoading: nextIdLoading } = useReadContract({
     address: ESCROW_ADDRESS,
     abi: escrowAbi,
     functionName: "nextTradeId",
@@ -22,7 +22,11 @@ export function TradeList({ refreshKey }: { refreshKey: number }) {
     return Array.from({ length: total }, (_, i) => BigInt(i + 1));
   }, [nextId]);
 
-  const { data: tradesData, refetch } = useReadContracts({
+  const {
+    data: tradesData,
+    refetch,
+    isLoading: tradesLoading,
+  } = useReadContracts({
     contracts: ids.map((id) => ({
       address: ESCROW_ADDRESS,
       abi: escrowAbi,
@@ -51,6 +55,17 @@ export function TradeList({ refreshKey }: { refreshKey: number }) {
     return <Empty>Connect your wallet to see trades you&apos;re part of.</Empty>;
   }
 
+  // Still resolving nextTradeId, or resolving the individual trades once we know
+  // there are some — show skeletons instead of briefly flashing "No trades yet."
+  const stillLoading = nextIdLoading || (ids.length > 0 && tradesLoading);
+  if (stillLoading) {
+    return (
+      <div style={{ display: "grid", gap: 14 }}>
+        <TicketSkeleton />
+      </div>
+    );
+  }
+
   if (mine.length === 0) {
     return <Empty>No trades yet. Lock funds above to start your first one.</Empty>;
   }
@@ -60,6 +75,30 @@ export function TradeList({ refreshKey }: { refreshKey: number }) {
       {mine.map(({ id, trade }) => (
         <TradeTicket key={id.toString()} id={id} trade={trade} onAction={() => refetch()} />
       ))}
+    </div>
+  );
+}
+
+function TicketSkeleton() {
+  return (
+    <div
+      style={{
+        background: "var(--slate)",
+        border: "1px solid var(--hairline)",
+        borderRadius: 14,
+        padding: "18px 20px",
+      }}
+      aria-hidden="true"
+    >
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 22 }}>
+        <div className="skeleton" style={{ width: 90, height: 14 }} />
+        <div className="skeleton" style={{ width: 100, height: 22, borderRadius: 6 }} />
+      </div>
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 20 }}>
+        <div className="skeleton" style={{ width: 70, height: 30 }} />
+        <div className="skeleton" style={{ width: 70, height: 30 }} />
+      </div>
+      <div className="skeleton" style={{ width: "100%", height: 36, borderRadius: 8 }} />
     </div>
   );
 }

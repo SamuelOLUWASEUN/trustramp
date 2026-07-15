@@ -5,6 +5,7 @@ import { useAccount, useConnect, useDisconnect, useChainId, useSwitchChain } fro
 import { monadTestnet } from "@/lib/chains";
 import { shortenAddress } from "@/lib/format";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { Spinner } from "@/components/Spinner";
 
 export function ConnectButton() {
   const { address, isConnected } = useAccount();
@@ -78,7 +79,13 @@ export function ConnectButton() {
       <Shell
         action={
           <button onClick={handleConnect} disabled={isPending} style={btn.primary}>
-            {isPending ? "Opening wallet…" : "Connect wallet"}
+            {isPending ? (
+              <>
+                <Spinner /> Opening wallet…
+              </>
+            ) : (
+              "Connect wallet"
+            )}
           </button>
         }
         status={
@@ -149,6 +156,10 @@ const base: React.CSSProperties = {
   border: "1px solid transparent",
   transition: "background 120ms, border-color 120ms",
   whiteSpace: "nowrap",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: 7,
 };
 
 const btn = {

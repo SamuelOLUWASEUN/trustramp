@@ -14,6 +14,7 @@ import {
 import { shortenAddress, formatDeadline, tradeSerial } from "@/lib/format";
 import { monadTestnet } from "@/lib/chains";
 import { config } from "@/lib/wagmi";
+import { Spinner } from "@/components/Spinner";
 
 const TONE_COLOR: Record<string, string> = {
   held: "var(--held)",
@@ -146,7 +147,13 @@ export function TradeTicket({
                   opacity: isPending || confirming ? 0.5 : 1,
                 }}
               >
-                {confirming ? "Confirming on-chain…" : a.label}
+                {confirming ? (
+                  <>
+                    <Spinner /> Confirming on-chain…
+                  </>
+                ) : (
+                  a.label
+                )}
               </button>
             ))}
           </div>
@@ -258,5 +265,8 @@ const ticket = {
     borderRadius: 8,
     fontSize: 13,
     fontWeight: 500,
+    display: "flex",
+    alignItems: "center",
+    gap: 6,
   } as React.CSSProperties,
 };
