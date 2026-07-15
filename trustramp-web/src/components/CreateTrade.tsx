@@ -236,6 +236,7 @@ const form = {
     color: "var(--fog)",
     padding: "0 12px",
     fontSize: 14,
+    minWidth: 0,
   } as React.CSSProperties,
   inputError: {
     borderColor: "var(--dispute)",

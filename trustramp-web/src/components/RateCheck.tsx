@@ -135,6 +135,7 @@ const card = {
     color: "var(--fog)",
     padding: "0 10px",
     fontSize: 16,
+    minWidth: 0,
   } as React.CSSProperties,
   verdict: {
     marginTop: 18,
