@@ -411,3 +411,110 @@ select {
 @media (prefers-reduced-motion: reduce) {
   .leg-live { animation: none; }
 }
+
+/* ── Ink spill theme transition ───────────────────────────────────
+   The View Transitions API cross-fades old/new snapshots by default. We kill
+   that animation so our clip-path circle is the only thing that moves —
+   otherwise the ink reveal fights a fade and looks muddy. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+/* The new theme is painted on top and revealed by the expanding circle. */
+::view-transition-old(root) { z-index: 0; }
+::view-transition-new(root) { z-index: 1; }
+
+/* ── Monad speed beam ─────────────────────────────────────────────
+   A light orbiting the card's border while a tx is in flight. Built from a
+   spinning conic gradient with the middle punched out, so it reads as a beam
+   travelling the border rather than a glow behind the card. */
+@keyframes beam-spin {
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+.beam {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.beam-rotor {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 220%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  background: conic-gradient(
+    transparent 0 76%,
+    var(--accent) 90%,
+    #ffffff 95%,
+    transparent 100%
+  );
+  animation: beam-spin 1.1s linear infinite;
+}
+
+/* Accelerate once the wallet has signed and we're waiting on the chain. */
+.beam[data-phase="fast"] .beam-rotor {
+  animation-duration: 0.5s;
+}
+
+/* Punches the centre out, leaving only a 1px ring of the rotor visible. */
+.beam-mask {
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  background: var(--slate);
+}
+
+/* Settling ripple once the tx lands. */
+@keyframes beam-ripple {
+  from { box-shadow: 0 0 0 0 rgba(91, 141, 239, 0.35); }
+  to   { box-shadow: 0 0 0 18px rgba(91, 141, 239, 0); }
+}
+
+.beam-settled {
+  animation: beam-ripple 700ms ease-out forwards;
+}
+
+/* ── Clipboard-aware paste button ─────────────────────────────────── */
+@keyframes paste-ready {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(91, 141, 239, 0); border-color: var(--hairline-strong); }
+  50%      { box-shadow: 0 0 10px -1px rgba(91, 141, 239, 0.8); border-color: var(--accent); }
+}
+
+.paste-ready {
+  animation: paste-ready 1.8s ease-in-out infinite;
+  color: var(--accent) !important;
+}
+
+/* ── Rate guard aura ──────────────────────────────────────────────── */
+@keyframes aura-pulse {
+  0%, 100% { opacity: 0.35; }
+  50%      { opacity: 0.75; }
+}
+
+.rate-aura {
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+  transition: box-shadow 420ms ease, opacity 420ms ease;
+}
+
+.rate-aura[data-pulse="true"] {
+  animation: aura-pulse 2.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .beam-rotor,
+  .paste-ready,
+  .rate-aura[data-pulse="true"] {
+    animation: none !important;
+  }
+}

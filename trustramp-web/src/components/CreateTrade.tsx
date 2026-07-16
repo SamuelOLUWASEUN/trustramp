@@ -10,6 +10,7 @@ import { monadTestnet } from "@/lib/chains";
 import { PasteButton } from "@/components/PasteButton";
 import { Spinner } from "@/components/Spinner";
 import { useWalletConnect } from "@/lib/useWalletConnect";
+import { SpeedBeam, type BeamPhase } from "@/components/SpeedBeam";
 
 const WINDOW_OPTIONS = [
   { label: "1 hour", seconds: 3600 },
@@ -78,8 +79,13 @@ export function CreateTrade({ onCreated }: { onCreated?: () => void }) {
     }
   }
 
+  // approving = waiting on the wallet; creating = broadcast, waiting on Monad.
+  const beamPhase: BeamPhase =
+    step === "approving" ? "signing" : step === "creating" ? "broadcasting" : "idle";
+
   return (
-    <section style={form.root}>
+    <section style={{ ...form.root, position: "relative" }}>
+      <SpeedBeam phase={beamPhase} />
       <div className="eyebrow" style={{ marginBottom: 16 }}>
         New trade · lock funds
       </div>

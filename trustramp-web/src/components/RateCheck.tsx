@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { sanitizeDecimalInput } from "@/lib/format";
+import { AnimatePresence, motion } from "framer-motion";
 
 type RateState =
   | { status: "loading" }
@@ -44,9 +45,67 @@ export function RateCheck() {
     ? ((mid.rate - offeredNum) / mid.rate) * 100
     : null;
 
+  // One source of truth for the copy AND the aura, so the glow can never
+  // disagree with the words next to it.
+  const verdict: {
+    key: string;
+    text: string;
+    color: string;
+    glow: string | null;
+    pulse: boolean;
+  } =
+    spreadPct === null
+      ? {
+          key: "idle",
+          text:
+            mid.status === "error"
+              ? "Live rate unavailable — enter both sides manually to compare."
+              : "Enter an offered rate to see how it compares.",
+          color: "var(--fog-faint)",
+          glow: null,
+          pulse: false,
+        }
+      : spreadPct > 8
+        ? {
+            key: "bad",
+            text: `You're being offered ${spreadPct.toFixed(1)}% below mid-market. That's a serious spread — walk away or push back hard.`,
+            color: "var(--dispute)",
+            glow: "rgba(248, 113, 113, 0.42)",
+            pulse: true,
+          }
+        : spreadPct > 3
+          ? {
+              key: "warn",
+              text: `You're being offered ${spreadPct.toFixed(1)}% below mid-market. That's a wide spread — push back or shop around.`,
+              color: "var(--dispute)",
+              glow: "rgba(248, 113, 113, 0.26)",
+              pulse: true,
+            }
+          : spreadPct < -1
+            ? {
+                key: "great",
+                text: "This rate beats mid-market. Looks good.",
+                color: "var(--cleared)",
+                glow: "rgba(52, 211, 153, 0.34)",
+                pulse: false,
+              }
+            : {
+                key: "fair",
+                text: `Within ${Math.abs(spreadPct).toFixed(1)}% of mid-market — a fair rate.`,
+                color: "var(--cleared)",
+                glow: "rgba(251, 191, 36, 0.24)",
+                pulse: false,
+              };
+
   return (
-    <section style={card.root}>
-      <div className="eyebrow" style={{ marginBottom: 14 }}>
+    <section style={{ ...card.root, position: "relative" }}>
+      <div
+        className="rate-aura"
+        data-pulse={verdict.pulse}
+        style={{ boxShadow: verdict.glow ? `0 0 26px 2px ${verdict.glow}` : "none" }}
+        aria-hidden="true"
+      />
+      <div className="eyebrow" style={{ marginBottom: 14, position: "relative" }}>
         Rate check · USD → NGN
       </div>
 
@@ -82,27 +141,21 @@ export function RateCheck() {
         </div>
       </div>
 
-      <div style={card.verdict}>
-        {spreadPct === null ? (
-          <span style={{ color: "var(--fog-faint)" }}>
-            {mid.status === "error"
-              ? "Live rate unavailable — enter both sides manually to compare."
-              : "Enter an offered rate to see how it compares."}
-          </span>
-        ) : spreadPct > 3 ? (
-          <span style={{ color: "var(--dispute)" }}>
-            You&apos;re being offered {spreadPct.toFixed(1)}% below mid-market. That&apos;s a wide
-            spread — push back or shop around.
-          </span>
-        ) : spreadPct < -1 ? (
-          <span style={{ color: "var(--cleared)" }}>
-            This rate beats mid-market. Looks good.
-          </span>
-        ) : (
-          <span style={{ color: "var(--cleared)" }}>
-            Within {Math.abs(spreadPct).toFixed(1)}% of mid-market — a fair rate.
-          </span>
-        )}
+      <div style={{ ...card.verdict, position: "relative", minHeight: 38, overflow: "hidden" }}>
+        {/* mode="wait" so the outgoing line clears before the new one arrives —
+            crossfading two different warnings would be unreadable. */}
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.p
+            key={verdict.key}
+            initial={{ y: 14, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -14, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 420, damping: 30 }}
+            style={{ color: verdict.color, margin: 0 }}
+          >
+            {verdict.text}
+          </motion.p>
+        </AnimatePresence>
       </div>
     </section>
   );

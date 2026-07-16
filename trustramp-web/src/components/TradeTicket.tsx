@@ -20,6 +20,7 @@ import { Spinner } from "@/components/Spinner";
 import { SwipeToConfirm } from "@/components/SwipeToConfirm";
 import { EscrowTimeline } from "@/components/EscrowTimeline";
 import { ConfettiBurst } from "@/components/ConfettiBurst";
+import { SpeedBeam, type BeamPhase } from "@/components/SpeedBeam";
 
 const TONE_COLOR: Record<string, string> = {
   held: "var(--held)",
@@ -117,6 +118,7 @@ export function TradeTicket({
       animate={celebrating ? { rotateY: [0, 8, -4, 0], scale: [1, 1.015, 1] } : {}}
       transition={{ duration: 0.7, ease: "easeInOut" }}
     >
+      <SpeedBeam phase={isPending ? "signing" : confirming ? "broadcasting" : "idle"} />
       {celebrating && <ConfettiBurst />}
       {/* Stub: serial + status stamp */}
       <div style={ticket.stub}>

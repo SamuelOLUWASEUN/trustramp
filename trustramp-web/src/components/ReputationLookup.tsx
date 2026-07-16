@@ -7,6 +7,7 @@ import { useReadContract } from "wagmi";
 import { ESCROW_ADDRESS, escrowAbi, type ReputationTuple } from "@/lib/contract";
 import { isAddressLike } from "@/lib/format";
 import { PasteButton } from "@/components/PasteButton";
+import { TrustGauge, trustScore } from "@/components/TrustGauge";
 
 export function ReputationLookup() {
   const [input, setInput] = useState("");
@@ -70,10 +71,13 @@ export function ReputationLookup() {
               start small.
             </span>
           ) : (
-            <div style={card.stats}>
-              <Stat n={completed} label="Cleared" color="var(--cleared)" />
-              <Stat n={refunded} label="Refunded" color="var(--fog-dim)" />
-              <Stat n={disputed} label="Disputed" color="var(--dispute)" />
+            <div style={{ display: "grid", gap: 16 }}>
+              <TrustGauge score={trustScore(completed, disputed, refunded)} total={total} />
+              <div style={card.stats}>
+                <Stat n={completed} label="Cleared" color="var(--cleared)" />
+                <Stat n={refunded} label="Refunded" color="var(--fog-dim)" />
+                <Stat n={disputed} label="Disputed" color="var(--dispute)" />
+              </div>
             </div>
           )}
         </div>
