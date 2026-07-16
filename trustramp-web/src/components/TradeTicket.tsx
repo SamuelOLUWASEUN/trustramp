@@ -17,6 +17,9 @@ import { shortenAddress, formatDeadline, tradeSerial, formatTimestamp } from "@/
 import { monadTestnet } from "@/lib/chains";
 import { config } from "@/lib/wagmi";
 import { Spinner } from "@/components/Spinner";
+import { SwipeToConfirm } from "@/components/SwipeToConfirm";
+import { EscrowTimeline } from "@/components/EscrowTimeline";
+import { ConfettiBurst } from "@/components/ConfettiBurst";
 
 const TONE_COLOR: Record<string, string> = {
   held: "var(--held)",
@@ -40,6 +43,7 @@ export function TradeTicket({
   const { writeContractAsync, isPending } = useWriteContract();
   const [confirming, setConfirming] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [celebrating, setCelebrating] = useState(false);
 
   const status = trade.status as TradeStatus;
   const meta = STATUS_META[status] ?? STATUS_META[TradeStatus.None];
@@ -70,6 +74,12 @@ export function TradeTicket({
       // hasn't landed yet — so wait for the actual receipt first.
       setConfirming(true);
       await waitForTransactionReceipt(config, { hash, chainId: monadTestnet.id });
+      if (fn === "releaseFunds") {
+        // Let the flip + burst play before the list refetches and animates the
+        // card away, otherwise the celebration is cut off by the collapse.
+        setCelebrating(true);
+        await new Promise((r) => setTimeout(r, 900));
+      }
       onAction?.();
     } catch (err) {
       console.error(err);
@@ -79,6 +89,10 @@ export function TradeTicket({
     }
   }
 
+  // Releasing funds is the one irreversible, high-stakes action here, so it does
+  // NOT get a plain button — it's gated behind the swipe slider below.
+  const canRelease = status === TradeStatus.PaymentConfirmed && isSender;
+
   // Which actions this wallet is allowed to take, given role + current status.
   const actions: { label: string; fn: Parameters<typeof call>[0]; tone: string }[] = [];
   if (status === TradeStatus.Created && isReceiver && !deadlinePassed) {
@@ -86,9 +100,6 @@ export function TradeTicket({
   }
   if (status === TradeStatus.Created && isSender && deadlinePassed) {
     actions.push({ label: "Reclaim funds", fn: "refund", tone: "var(--fog-dim)" });
-  }
-  if (status === TradeStatus.PaymentConfirmed && isSender) {
-    actions.push({ label: "Release funds", fn: "releaseFunds", tone: "var(--cleared)" });
   }
   if (
     (status === TradeStatus.Created || status === TradeStatus.PaymentConfirmed) &&
@@ -100,7 +111,13 @@ export function TradeTicket({
   const amount = formatUnits(trade.amount, 6); // USDC-style 6 decimals
 
   return (
-    <article className={breathing ? "card-breathing" : undefined} style={ticket.root}>
+    <motion.article
+      className={breathing ? "card-breathing" : undefined}
+      style={{ ...ticket.root, position: "relative", transformStyle: "preserve-3d" }}
+      animate={celebrating ? { rotateY: [0, 8, -4, 0], scale: [1, 1.015, 1] } : {}}
+      transition={{ duration: 0.7, ease: "easeInOut" }}
+    >
+      {celebrating && <ConfettiBurst />}
       {/* Stub: serial + status stamp */}
       <div style={ticket.stub}>
         <div>
@@ -149,6 +166,21 @@ export function TradeTicket({
             </div>
           </div>
         </div>
+
+        {canRelease && (
+          <div style={{ marginTop: 16 }}>
+            <SwipeToConfirm
+              label="Slide to release funds"
+              busyLabel={celebrating ? "Released" : "Releasing…"}
+              busy={confirming || isPending || celebrating}
+              onConfirm={() => call("releaseFunds")}
+            />
+            <p style={{ fontSize: 11, color: "var(--fog-faint)", marginTop: 8, lineHeight: 1.5 }}>
+              Only slide once you&apos;ve confirmed the naira actually landed. This pays out
+              immediately and can&apos;t be undone.
+            </p>
+          </div>
+        )}
 
         {actions.length > 0 && (
           <div style={ticket.actions}>
@@ -208,6 +240,7 @@ export function TradeTicket({
                   }}
                   style={{ overflow: "hidden" }}
                 >
+                  <EscrowTimeline status={status} />
                   <motion.dl
                     initial={{ y: 8, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
@@ -242,7 +275,7 @@ export function TradeTicket({
           </>
         )}
       </div>
-    </article>
+    </motion.article>
   );
 }
 

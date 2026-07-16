@@ -4,6 +4,7 @@ import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { TradeTicket } from "./TradeTicket";
 import { useTrades } from "@/lib/useTrades";
+import { MagneticPull } from "@/components/MagneticPull";
 
 export function TradeList({ refreshKey }: { refreshKey: number }) {
   const { address, active, completed, refetch, isLoading } = useTrades(refreshKey);
@@ -72,6 +73,7 @@ export function TradeList({ refreshKey }: { refreshKey: number }) {
 
       {hasHistory && (
         <motion.div layout>
+          <MagneticPull>
           <Link href="/history" style={{ display: "block" }}>
             {/* layoutId pairs this with the history page's grid wrapper, so the
                 button's box stretches out into the page rather than cutting. */}
@@ -98,6 +100,7 @@ export function TradeList({ refreshKey }: { refreshKey: number }) {
               </span>
             </motion.div>
           </Link>
+          </MagneticPull>
         </motion.div>
       )}
     </div>

@@ -386,3 +386,28 @@ select {
     animation: none !important;
   }
 }
+
+/* ── Live escrow leg ──────────────────────────────────────────────
+   The leg the trade is currently waiting on gets a light travelling along it,
+   so an in-flight escrow reads as alive rather than stalled. */
+@keyframes leg-travel {
+  0%   { background-position: -140% 0; }
+  100% { background-position: 240% 0; }
+}
+
+.leg-live {
+  background: linear-gradient(
+    90deg,
+    var(--hairline-strong) 0%,
+    var(--hairline-strong) 35%,
+    var(--cleared) 50%,
+    var(--hairline-strong) 65%,
+    var(--hairline-strong) 100%
+  ) !important;
+  background-size: 220% 100% !important;
+  animation: leg-travel 1.9s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .leg-live { animation: none; }
+}
