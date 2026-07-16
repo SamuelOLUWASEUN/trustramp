@@ -16,7 +16,7 @@
   --input-bg: var(--void);
   --banner-bg: #2b2210;
   --banner-text: #f5c451;
-  --header-tint: rgba(10, 14, 23, 0.55);
+  --header-tint: rgba(21, 27, 40, 0.72);
   --header-solid: #0a0e17;
 
   --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
@@ -40,7 +40,7 @@
   --input-bg: #f4f5f7;
   --banner-bg: #fdf0d5;
   --banner-text: #92600a;
-  --header-tint: rgba(244, 245, 247, 0.6);
+  --header-tint: rgba(255, 255, 255, 0.75);
   --header-solid: #f4f5f7;
 }
 
@@ -58,7 +58,11 @@ body {
   -webkit-font-smoothing: antialiased;
   font-feature-settings: "ss01", "ss02";
   max-width: 100%;
-  overflow-x: hidden;
+  /* `clip` not `hidden`: overflow-x:hidden forces overflow-y to compute as auto,
+     which turns html/body into a scroll container and silently kills
+     position:sticky on every descendant. `clip` contains overflow without
+     creating that scroll container, so the sticky header actually works. */
+  overflow-x: clip;
 }
 
 body {
@@ -244,14 +248,21 @@ select {
   opacity: 1;
 }
 
+/* Master sticky anchor: wraps the warning banner AND the header so both lock to
+   the top as one unit. Transparent so it adds no bulk of its own — each child
+   brings its own background. Sticky lives here, not on the header. */
+.sticky-top {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: transparent;
+}
+
 /* Sticky header: frosted rather than a solid slab, so the page's background
    gradient still reads through it while scrolled content stays legible behind. */
 .site-header {
-  position: sticky;
-  top: 0;
-  z-index: 10;
   /* Fallback for browsers without backdrop-filter: go opaque, since a
-     see-through sticky bar would let content scroll under and collide. */
+     see-through bar would let content show straight through the logo. */
   background: var(--header-solid);
 }
 

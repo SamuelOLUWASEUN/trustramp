@@ -15,18 +15,20 @@ export default function Home() {
 
   return (
     <>
-      <WalletBanner />
-      <header className="site-header">
-        <div style={page.headerInner}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={page.mark} aria-hidden="true" />
-            <span style={{ fontSize: 17, fontWeight: 600, letterSpacing: "-0.01em" }}>
-              Trustramp
-            </span>
+      <div className="sticky-top">
+        <WalletBanner />
+        <header className="site-header">
+          <div style={page.headerInner}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={page.mark} aria-hidden="true" />
+              <span style={{ fontSize: 17, fontWeight: 600, letterSpacing: "-0.01em" }}>
+                Trustramp
+              </span>
+            </div>
+            <ConnectButton />
           </div>
-          <ConnectButton />
-        </div>
-      </header>
+        </header>
+      </div>
       <main style={page.wrap}>
 
       <section style={page.hero}>
