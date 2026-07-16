@@ -1,5 +1,6 @@
 "use client";
 
+import { MotionButton } from "@/components/MotionButton";
 import { useState } from "react";
 import { formatUnits } from "viem";
 import { useAccount, useWriteContract } from "wagmi";
@@ -136,7 +137,7 @@ export function TradeTicket({
         {actions.length > 0 && (
           <div style={ticket.actions}>
             {actions.map((a) => (
-              <button
+              <MotionButton
                 key={a.fn}
                 onClick={() => call(a.fn)}
                 disabled={isPending || confirming}
@@ -154,7 +155,7 @@ export function TradeTicket({
                 ) : (
                   a.label
                 )}
-              </button>
+              </MotionButton>
             ))}
           </div>
         )}

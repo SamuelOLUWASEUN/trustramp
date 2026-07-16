@@ -27,13 +27,24 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${spaceGrotesk.variable} ${jetbrainsMono.variable}`}>
+    <html
+      lang="en"
+      // Rendered server-side so the attribute already exists in the SSR HTML and
+      // the pre-paint script below only ever *changes* it, never adds it.
+      data-theme="dark"
+      // The script intentionally mutates this element before React hydrates (that's
+      // the whole point — it prevents a flash of the wrong theme). React can't know
+      // that's deliberate, so it errors on the mismatch. This scopes the exemption
+      // to this element's own attributes only; children still get full checking.
+      suppressHydrationWarning
+      className={`${spaceGrotesk.variable} ${jetbrainsMono.variable}`}
+    >
       <head>
         <script
           // Runs before paint so we never flash the wrong theme. Reads the saved
           // preference; falls back to dark, which is the intended default.
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('trustramp-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();`,
+            __html: `(function(){try{var t=localStorage.getItem('trustramp-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');}}catch(e){}})();`,
           }}
         />
       </head>

@@ -1,5 +1,6 @@
 "use client";
 
+import { MotionButton } from "@/components/MotionButton";
 import { useState } from "react";
 import { type Address } from "viem";
 import { useReadContract } from "wagmi";
@@ -45,14 +46,14 @@ export function ReputationLookup() {
           />
           <PasteButton onPaste={setInput} />
         </div>
-        <button
+        <MotionButton
           onClick={() => isAddressLike(input) && setTarget(input)}
           disabled={!isAddressLike(input)}
           className="check-btn"
           style={{ ...card.btn, opacity: isAddressLike(input) ? 1 : 0.45 }}
         >
           Check
-        </button>
+        </MotionButton>
       </div>
 
       {target && (

@@ -1,5 +1,6 @@
 "use client";
 
+import { MotionButton } from "@/components/MotionButton";
 import { useEffect, useState } from "react";
 
 type Theme = "dark" | "light";
@@ -31,7 +32,7 @@ export function ThemeToggle() {
   }
 
   return (
-    <button
+    <MotionButton
       onClick={toggle}
       aria-label={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
       style={{
@@ -48,6 +49,6 @@ export function ThemeToggle() {
       }}
     >
       {theme === "light" ? "🌙" : "☀️"}
-    </button>
+    </MotionButton>
   );
 }

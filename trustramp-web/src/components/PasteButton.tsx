@@ -1,5 +1,7 @@
 "use client";
 
+import { MotionButton } from "@/components/MotionButton";
+
 export function PasteButton({ onPaste }: { onPaste: (text: string) => void }) {
   async function handlePaste() {
     try {
@@ -11,7 +13,7 @@ export function PasteButton({ onPaste }: { onPaste: (text: string) => void }) {
   }
 
   return (
-    <button
+    <MotionButton
       type="button"
       onClick={handlePaste}
       className="addr-paste"
@@ -27,6 +29,6 @@ export function PasteButton({ onPaste }: { onPaste: (text: string) => void }) {
       }}
     >
       Paste
-    </button>
+    </MotionButton>
   );
 }

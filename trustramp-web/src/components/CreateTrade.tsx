@@ -1,5 +1,6 @@
 "use client";
 
+import { MotionButton } from "@/components/MotionButton";
 import { useState } from "react";
 import { parseUnits, type Address } from "viem";
 import { useAccount, useWriteContract, useChainId, useSwitchChain } from "wagmi";
@@ -161,7 +162,7 @@ export function CreateTrade({ onCreated }: { onCreated?: () => void }) {
       {error && <div style={form.error}>{error}</div>}
 
       {!isConnected ? (
-        <button onClick={connectOrOpenMetaMask} disabled={connectPending} style={form.connectBlocker}>
+        <MotionButton onClick={connectOrOpenMetaMask} disabled={connectPending} style={form.connectBlocker}>
           {connectPending ? (
             <>
               <Spinner /> Opening wallet…
@@ -169,16 +170,16 @@ export function CreateTrade({ onCreated }: { onCreated?: () => void }) {
           ) : (
             "🔌 Connect wallet to lock funds"
           )}
-        </button>
+        </MotionButton>
       ) : onWrongNetwork ? (
-        <button
+        <MotionButton
           onClick={() => switchChainAsync({ chainId: monadTestnet.id }).catch(() => {})}
           style={form.switchNetwork}
         >
           Switch to Monad testnet to continue
-        </button>
+        </MotionButton>
       ) : (
-        <button onClick={submit} disabled={!canSubmit} style={{ ...form.submit, opacity: canSubmit ? 1 : 0.45 }}>
+        <MotionButton onClick={submit} disabled={!canSubmit} style={{ ...form.submit, opacity: canSubmit ? 1 : 0.45 }}>
           {step === "approving" ? (
             <>
               <Spinner /> Approving token…
@@ -190,7 +191,7 @@ export function CreateTrade({ onCreated }: { onCreated?: () => void }) {
           ) : (
             "Lock funds in escrow"
           )}
-        </button>
+        </MotionButton>
       )}
     </section>
   );

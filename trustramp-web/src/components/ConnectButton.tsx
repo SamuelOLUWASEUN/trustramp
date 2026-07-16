@@ -1,5 +1,6 @@
 "use client";
 
+import { MotionButton } from "@/components/MotionButton";
 import { useAccount, useDisconnect, useChainId, useSwitchChain } from "wagmi";
 import { monadTestnet } from "@/lib/chains";
 import { shortenAddress } from "@/lib/format";
@@ -40,7 +41,7 @@ export function ConnectButton() {
     return (
       <Shell
         action={
-          <button
+          <MotionButton
             onClick={connectOrOpenMetaMask}
             disabled={isPending}
             style={btn.icon}
@@ -48,7 +49,7 @@ export function ConnectButton() {
             title={hasInjectedProvider ? "Connect wallet" : "Open in MetaMask"}
           >
             {isPending ? <Spinner /> : <WalletIcon />}
-          </button>
+          </MotionButton>
         }
         status={
           connectError ? (
@@ -65,9 +66,9 @@ export function ConnectButton() {
     return (
       <Shell
         action={
-          <button onClick={() => switchChain({ chainId: monadTestnet.id })} style={btn.warn}>
+          <MotionButton onClick={() => switchChain({ chainId: monadTestnet.id })} style={btn.warn}>
             Switch to Monad testnet
-          </button>
+          </MotionButton>
         }
         status={
           <StatusPill color="var(--held)" label={`Wrong network · ${shortenAddress(address)}`} />
@@ -79,9 +80,9 @@ export function ConnectButton() {
   return (
     <Shell
       action={
-        <button onClick={() => disconnect()} style={btn.ghost}>
+        <MotionButton onClick={() => disconnect()} style={btn.ghost}>
           Disconnect
-        </button>
+        </MotionButton>
       }
       status={<StatusPill color="var(--cleared)" label={shortenAddress(address)} />}
     />

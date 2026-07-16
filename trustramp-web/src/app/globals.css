@@ -86,7 +86,14 @@ button {
   transition: opacity 100ms, transform 100ms, background-color 150ms, border-color 150ms;
 }
 
-button:active:not(:disabled) {
+/* Framer drives transform on .motion-btn via inline styles. A CSS transform
+   transition here would fight the spring and flatten the wobble, so motion
+   buttons only keep the colour transitions. */
+button.motion-btn {
+  transition: background-color 150ms, border-color 150ms;
+}
+
+button:active:not(:disabled):not(.motion-btn) {
   opacity: 0.72;
   transform: scale(0.98);
 }
@@ -207,8 +214,12 @@ select {
 .addr-field .addr-paste {
   position: absolute;
   right: 4px;
-  top: 50%;
-  transform: translateY(-50%);
+  /* Centred with auto margins, deliberately NOT transform: translateY(-50%).
+     Framer Motion animates transform inline, which would override the centring
+     and drop the button out of the input on hover. */
+  top: 0;
+  bottom: 0;
+  margin-block: auto;
 }
 
 /* Reputation check's input+Check: row on wider screens, Check drops full-width
