@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import { escrowConfigured } from "@/lib/contract";
-import { ConnectButton } from "@/components/ConnectButton";
-import { WalletBanner } from "@/components/WalletBanner";
+import { SiteHeader } from "@/components/SiteHeader";
 import { RateCheck } from "@/components/RateCheck";
 import { CreateTrade } from "@/components/CreateTrade";
 import { TradeList } from "@/components/TradeList";
@@ -15,20 +14,7 @@ export default function Home() {
 
   return (
     <>
-      <div className="sticky-top">
-        <WalletBanner />
-        <header className="site-header">
-          <div style={page.headerInner}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <div style={page.mark} aria-hidden="true" />
-              <span style={{ fontSize: 17, fontWeight: 600, letterSpacing: "-0.01em" }}>
-                Trustramp
-              </span>
-            </div>
-            <ConnectButton />
-          </div>
-        </header>
-      </div>
+      <SiteHeader />
       <main style={page.wrap}>
 
       <section style={page.hero}>

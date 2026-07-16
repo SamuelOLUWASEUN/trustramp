@@ -28,6 +28,23 @@ export function tradeSerial(id: bigint | number): string {
   return `TR-${String(id).padStart(6, "0")}`;
 }
 
+// Formatted with explicit UTC and a fixed locale on purpose. Using the browser's
+// local timezone/locale here would render differently on the server than on the
+// client and trip a hydration mismatch — the exact bug we just fixed in layout.
+export function formatTimestamp(ts: bigint): string {
+  if (!ts) return "—";
+  const d = new Date(Number(ts) * 1000);
+  return d.toLocaleString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "UTC",
+    hour12: false,
+  }) + " UTC";
+}
+
 // Cleans up raw keystrokes for a numeric input: strips anything non-numeric,
 // keeps only the first decimal point, and trims stray leading zeros (but
 // keeps a single "0" or "0." so the user can still type "0.5").

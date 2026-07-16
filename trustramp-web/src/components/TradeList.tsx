@@ -1,64 +1,19 @@
 "use client";
 
-import { useMemo } from "react";
-import { useAccount, useReadContract, useReadContracts } from "wagmi";
-import { ESCROW_ADDRESS, escrowAbi, type TradeTuple } from "@/lib/contract";
+import Link from "next/link";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { TradeTicket } from "./TradeTicket";
+import { useTrades } from "@/lib/useTrades";
 
 export function TradeList({ refreshKey }: { refreshKey: number }) {
-  const { address } = useAccount();
-
-  const { data: nextId, isLoading: nextIdLoading } = useReadContract({
-    address: ESCROW_ADDRESS,
-    abi: escrowAbi,
-    functionName: "nextTradeId",
-    query: { refetchInterval: 8000 },
-    scopeKey: `next-${refreshKey}`,
-  });
-
-  const ids = useMemo(() => {
-    if (!nextId) return [];
-    const total = Number(nextId) - 1;
-    return Array.from({ length: total }, (_, i) => BigInt(i + 1));
-  }, [nextId]);
-
-  const {
-    data: tradesData,
-    refetch,
-    isLoading: tradesLoading,
-  } = useReadContracts({
-    contracts: ids.map((id) => ({
-      address: ESCROW_ADDRESS,
-      abi: escrowAbi,
-      functionName: "getTrade",
-      args: [id],
-    })),
-    query: { enabled: ids.length > 0 },
-    scopeKey: `trades-${refreshKey}-${ids.length}`,
-  });
-
-  const mine = useMemo(() => {
-    if (!tradesData || !address) return [];
-    const lower = address.toLowerCase();
-    return ids
-      .map((id, i) => ({ id, trade: tradesData[i]?.result as TradeTuple | undefined }))
-      .filter(
-        (t): t is { id: bigint; trade: TradeTuple } =>
-          !!t.trade &&
-          (t.trade.sender.toLowerCase() === lower ||
-            t.trade.receiver.toLowerCase() === lower)
-      )
-      .reverse();
-  }, [tradesData, ids, address]);
+  const { address, active, completed, refetch, isLoading } = useTrades(refreshKey);
+  const reduceMotion = useReducedMotion();
 
   if (!address) {
     return <Empty>Connect your wallet to see trades you&apos;re part of.</Empty>;
   }
 
-  // Still resolving nextTradeId, or resolving the individual trades once we know
-  // there are some — show skeletons instead of briefly flashing "No trades yet."
-  const stillLoading = nextIdLoading || (ids.length > 0 && tradesLoading);
-  if (stillLoading) {
+  if (isLoading) {
     return (
       <div style={{ display: "grid", gap: 14 }}>
         <TicketSkeleton />
@@ -66,15 +21,85 @@ export function TradeList({ refreshKey }: { refreshKey: number }) {
     );
   }
 
-  if (mine.length === 0) {
-    return <Empty>No trades yet. Lock funds above to start your first one.</Empty>;
-  }
+  const hasHistory = completed.length > 0;
 
   return (
     <div style={{ display: "grid", gap: 14 }}>
-      {mine.map(({ id, trade }) => (
-        <TradeTicket key={id.toString()} id={id} trade={trade} onAction={() => refetch()} />
-      ))}
+      {/* AnimatePresence + a keyed height animation is what lets the last card
+          collapse away instead of vanishing, with the zero-state fading up
+          into the space it leaves behind. */}
+      <AnimatePresence mode="popLayout" initial={false}>
+        {active.map(({ id, trade }) => (
+          <motion.div
+            key={id.toString()}
+            layout
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={
+              reduceMotion
+                ? { opacity: 0 }
+                : { opacity: 0, height: 0, marginBottom: -14, scaleY: 0.9 }
+            }
+            transition={{
+              layout: { type: "spring", stiffness: 320, damping: 30 },
+              default: { duration: 0.28 },
+            }}
+            style={{ overflow: "hidden", transformOrigin: "top" }}
+          >
+            <TradeTicket id={id} trade={trade} onAction={() => refetch()} />
+          </motion.div>
+        ))}
+      </AnimatePresence>
+
+      <AnimatePresence initial={false}>
+        {active.length === 0 && (
+          <motion.div
+            key="zero"
+            layout
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3, delay: active.length === 0 ? 0.12 : 0 }}
+          >
+            <Empty>
+              {hasHistory
+                ? "No active escrows. Everything's settled."
+                : "No trades yet. Lock funds above to start your first one."}
+            </Empty>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {hasHistory && (
+        <motion.div layout>
+          <Link href="/history" style={{ display: "block" }}>
+            {/* layoutId pairs this with the history page's grid wrapper, so the
+                button's box stretches out into the page rather than cutting. */}
+            <motion.div
+              layoutId="history-surface"
+              style={{
+                border: "1px solid var(--hairline)",
+                borderRadius: 14,
+                padding: "14px 18px",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                background: "var(--slate)",
+                fontSize: 13.5,
+                color: "var(--fog-dim)",
+              }}
+              whileHover={reduceMotion ? undefined : { scale: 1.01 }}
+              whileTap={reduceMotion ? undefined : { scale: 0.99 }}
+              transition={{ type: "spring", stiffness: 400, damping: 30 }}
+            >
+              <span>View full trade history</span>
+              <span className="mono" style={{ color: "var(--fog-faint)" }}>
+                {completed.length} settled →
+              </span>
+            </motion.div>
+          </Link>
+        </motion.div>
+      )}
     </div>
   );
 }

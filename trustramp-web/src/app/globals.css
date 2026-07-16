@@ -284,3 +284,105 @@ select {
     backdrop-filter: blur(14px) saturate(140%);
   }
 }
+
+/* ── Organic breathing ─────────────────────────────────────────────
+   Active trades get a soft rhythm so they read as "in progress" rather
+   than as a static block. Deliberately slow and low-amplitude: this sits
+   on screen for minutes at a time and must never become annoying. */
+@keyframes breathe {
+  0%, 100% { opacity: 0.72; box-shadow: 0 0 0 0 transparent; }
+  50%      { opacity: 1;    box-shadow: 0 0 12px -2px currentColor; }
+}
+
+.badge-breathing {
+  animation: breathe 2.6s ease-in-out infinite;
+}
+
+/* The card outline breathes in sympathy with its badge, one notch softer. */
+@keyframes breathe-outline {
+  0%, 100% { border-color: var(--hairline); }
+  50%      { border-color: var(--hairline-strong); }
+}
+
+.card-breathing {
+  animation: breathe-outline 2.6s ease-in-out infinite;
+}
+
+/* ── 3D tilt + glare ──────────────────────────────────────────────── */
+.tilt-card {
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.tilt-glare {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 180ms ease;
+  background: radial-gradient(
+    circle at var(--glare-x, 50%) var(--glare-y, 50%),
+    rgba(255, 255, 255, 0.1),
+    transparent 55%
+  );
+}
+
+.tilt-card:hover .tilt-glare {
+  opacity: 1;
+}
+
+/* Tilt is a pointer-only flourish — it has no meaning on touch, where there's
+   no hover to drive it. */
+@media (hover: none) {
+  .tilt-glare { display: none; }
+}
+
+/* ── Filter tabs ──────────────────────────────────────────────────── */
+.filter-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 12px;
+  background: var(--slate-2);
+  border: 1px solid var(--hairline);
+  width: fit-content;
+  position: relative;
+}
+
+.filter-tab {
+  position: relative;
+  border: none;
+  background: transparent;
+  color: var(--fog-dim);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 7px 16px;
+  border-radius: 9px;
+  white-space: nowrap;
+  z-index: 1;
+}
+
+.filter-tab[data-active="true"] {
+  color: var(--fog);
+}
+
+.filter-pill {
+  position: absolute;
+  inset: 0;
+  border-radius: 9px;
+  background: var(--header-tint);
+  border: 1px solid var(--hairline-strong);
+  -webkit-backdrop-filter: blur(8px) saturate(140%);
+  backdrop-filter: blur(8px) saturate(140%);
+  z-index: 0;
+}
+
+/* Reduced motion: kill the ambient loops entirely. The spring interactions are
+   handled in JS via useReducedMotion. */
+@media (prefers-reduced-motion: reduce) {
+  .badge-breathing,
+  .card-breathing {
+    animation: none !important;
+  }
+}

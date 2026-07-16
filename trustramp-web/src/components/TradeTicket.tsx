@@ -3,6 +3,7 @@
 import { MotionButton } from "@/components/MotionButton";
 import { useState } from "react";
 import { formatUnits } from "viem";
+import { AnimatePresence, motion } from "framer-motion";
 import { useAccount, useWriteContract } from "wagmi";
 import { waitForTransactionReceipt } from "wagmi/actions";
 import {
@@ -12,7 +13,7 @@ import {
   TradeStatus,
   type TradeTuple,
 } from "@/lib/contract";
-import { shortenAddress, formatDeadline, tradeSerial } from "@/lib/format";
+import { shortenAddress, formatDeadline, tradeSerial, formatTimestamp } from "@/lib/format";
 import { monadTestnet } from "@/lib/chains";
 import { config } from "@/lib/wagmi";
 import { Spinner } from "@/components/Spinner";
@@ -28,18 +29,28 @@ export function TradeTicket({
   id,
   trade,
   onAction,
+  expandable = false,
 }: {
   id: bigint;
   trade: TradeTuple;
   onAction?: () => void;
+  expandable?: boolean;
 }) {
   const { address } = useAccount();
   const { writeContractAsync, isPending } = useWriteContract();
   const [confirming, setConfirming] = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   const status = trade.status as TradeStatus;
   const meta = STATUS_META[status] ?? STATUS_META[TradeStatus.None];
   const tone = TONE_COLOR[meta.tone];
+
+  // Only in-flight trades breathe. A settled trade sitting there pulsing would
+  // imply it still wants something from you.
+  const breathing =
+    status === TradeStatus.Created ||
+    status === TradeStatus.PaymentConfirmed ||
+    status === TradeStatus.Disputed;
 
   const isSender = address?.toLowerCase() === trade.sender.toLowerCase();
   const isReceiver = address?.toLowerCase() === trade.receiver.toLowerCase();
@@ -89,7 +100,7 @@ export function TradeTicket({
   const amount = formatUnits(trade.amount, 6); // USDC-style 6 decimals
 
   return (
-    <article style={ticket.root}>
+    <article className={breathing ? "card-breathing" : undefined} style={ticket.root}>
       {/* Stub: serial + status stamp */}
       <div style={ticket.stub}>
         <div>
@@ -100,7 +111,12 @@ export function TradeTicket({
             {tradeSerial(id)}
           </div>
         </div>
-        <div style={{ ...ticket.stamp, color: tone, borderColor: tone }}>{meta.label}</div>
+        <div
+          className={breathing ? "badge-breathing" : undefined}
+          style={{ ...ticket.stamp, color: tone, borderColor: tone }}
+        >
+          {meta.label}
+        </div>
       </div>
 
       {/* Perforation */}
@@ -159,8 +175,85 @@ export function TradeTicket({
             ))}
           </div>
         )}
+        {expandable && (
+          <>
+            <MotionButton
+              onClick={() => setExpanded((v) => !v)}
+              aria-expanded={expanded}
+              style={ticket.expandBtn}
+            >
+              <span>{expanded ? "Hide details" : "Details"}</span>
+              <motion.span
+                animate={{ rotate: expanded ? 180 : 0 }}
+                transition={{ type: "spring", stiffness: 400, damping: 22 }}
+                style={{ display: "inline-flex", fontSize: 10 }}
+                aria-hidden="true"
+              >
+                ▾
+              </motion.span>
+            </MotionButton>
+
+            <AnimatePresence initial={false}>
+              {expanded && (
+                // Animating height (not just opacity) is what pushes the cards
+                // below down with the spring rather than letting them jump.
+                <motion.div
+                  key="details"
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{
+                    height: { type: "spring", stiffness: 320, damping: 30 },
+                    opacity: { duration: 0.18 },
+                  }}
+                  style={{ overflow: "hidden" }}
+                >
+                  <motion.dl
+                    initial={{ y: 8, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.06, duration: 0.22 }}
+                    style={ticket.details}
+                  >
+                    <Detail label="Opened" value={formatTimestamp(trade.createdAt)} />
+                    <Detail
+                      label="Confirm deadline"
+                      value={formatTimestamp(trade.confirmDeadline)}
+                    />
+                    <Detail label="Route" value={`${shortenAddress(trade.sender)} → ${shortenAddress(trade.receiver)}`} />
+                    <Detail label="Token" value={shortenAddress(trade.token)} />
+                    <Detail label="Escrow" value={shortenAddress(ESCROW_ADDRESS)} />
+                    <Detail
+                      label="Explorer"
+                      value={
+                        <a
+                          href={`${monadTestnet.blockExplorers.default.url}/address/${ESCROW_ADDRESS}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          style={{ color: "var(--accent)" }}
+                        >
+                          View contract ↗
+                        </a>
+                      }
+                    />
+                  </motion.dl>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </>
+        )}
       </div>
     </article>
+  );
+}
+
+function Detail({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
+      <dt style={{ fontSize: 12, color: "var(--fog-faint)" }}>{label}</dt>
+      <dd className="mono" style={{ fontSize: 12, color: "var(--fog-dim)", textAlign: "right" }}>
+        {value}
+      </dd>
+    </div>
   );
 }
 
@@ -257,6 +350,28 @@ const ticket = {
     flexWrap: "wrap",
     gap: 8,
     marginTop: 18,
+  } as React.CSSProperties,
+  expandBtn: {
+    marginTop: 14,
+    width: "100%",
+    height: 34,
+    background: "transparent",
+    border: "1px dashed var(--hairline-strong)",
+    borderRadius: 8,
+    color: "var(--fog-dim)",
+    fontSize: 12.5,
+    fontWeight: 500,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 7,
+  } as React.CSSProperties,
+  details: {
+    display: "grid",
+    gap: 9,
+    marginTop: 14,
+    paddingTop: 14,
+    borderTop: "1px solid var(--hairline)",
   } as React.CSSProperties,
   actionBtn: {
     height: 36,
